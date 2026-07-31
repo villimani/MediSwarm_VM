@@ -1,5 +1,5 @@
 # Use the specified PyTorch image as the base
-ARG PYTORCH_IMAGE=dhi.io/pytorch:2.13-cuda12.6-cudnn9-debian-dev
+ARG PYTORCH_IMAGE=nvcr.io/nvidia/pytorch:23.11-py3-igpu
 FROM ${PYTORCH_IMAGE}
 
 # Specify the NVFlare version
@@ -15,7 +15,8 @@ RUN python3 -m pip install -U setuptools==69.5.1
 RUN python3 -m pip install -U --upgrade packaging
 
 # Install additional Python packages
-RUN python3 -m pip install torchvision==0.15.1 tensorboard==2.16.2
+#RUN python3 -m pip install torchvision==0.17.0
+RUN python3 -m pip install tensorboard==2.16.2
 
 # Install NVFlare from the local source and nvflare-nightly (not at fixed version)
 # (Assuming you have your modified nvflare source code in a local directory named 'nvflare')

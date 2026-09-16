@@ -1,7 +1,13 @@
-# Use the specified PyTorch image as the base
-ARG PYTORCH_IMAGE=nvcr.io/nvidia/pytorch:23.11-py3-igpu
-FROM ${PYTORCH_IMAGE}
+# Base image selection: architecture-aware (fixes the ARM64-only default
+# tag failing outright on amd64 machines with a platform-mismatch error)
+ARG PYTORCH_IMAGE_AMD64=nvcr.io/nvidia/pytorch:23.11-py3
+ARG PYTORCH_IMAGE_ARM64=nvcr.io/nvidia/pytorch:23.11-py3-igpu
+ARG TARGETARCH
 
+FROM ${PYTORCH_IMAGE_AMD64} AS base-amd64
+FROM ${PYTORCH_IMAGE_ARM64} AS base-arm64
+
+FROM base-${TARGETARCH}
 # Specify the NVFlare version
 ARG NVF_VERSION=2.4.1
 ENV NVF_BRANCH=${NVF_VERSION}
@@ -32,6 +38,9 @@ RUN rm -rf /workspace/nvflare
 #COPY ../controller /workspace/controller
 #RUN python -m pip install /workspace/controller
 #RUN rm -rf /workspace/controller
+
+# Pin aiohttp — base image's 3.8.6 lacks get_extra_info(), which NVFlare requires.
+RUN python3 -m pip install aiohttp==3.14.3
 
 # Set the Docker image name
 LABEL name="nvflare-pt-dev:cifar10"
